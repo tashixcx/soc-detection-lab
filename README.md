@@ -3,8 +3,7 @@
 
 ### overview
 
-Threat detection & adversary emulation lab.
-End to end, locally hosted threat emulation + SOC managing and detection homelab. 
+End to end, locally hosted SOC homelab. Includes threat emulation, telemetry ingestion from windows and linux endpoints, Lucene/EQL rules creation, investigation and triaging of incidents, and remediation+hardening.
 
 ### tech stack
 
