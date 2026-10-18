@@ -69,7 +69,9 @@ add this line as a cron job using
 
 this runs our script every 1 minute.
 
-Now on the attacker machine just exit the ssh session, run `nc -lvnp 4444` to listen and wait for the connection.![Pasted image 20261008160316](images/Pasted%20image%2020261008160316.png)
+Now on the attacker machine just exit the ssh session, run `nc -lvnp 4444` to listen and wait for the connection.
+![Pasted image 20261008160316](images/Pasted%20image%2020261008160316.png)
+
 *basic, unupgraded terminal*
 
 ---
@@ -119,37 +121,51 @@ osTicket action:
   "message": "data:text/html,<h3>Persistence Alert: Cron Modification</h3><p><b>Rule:</b> {{context.rule.name}}</p><p><b>Severity:</b> {{context.rule.severity}}</p>{{#context.alerts}}<p><b>Host:</b> {{host.name}}</p><p><b>User:</b> {{user.name}}</p><p><b>Target Path:</b> {{file.path}}</p><p><b>Command Executed:</b> {{process.command_line}}</p>{{/context.alerts}}<p><a href=\"{{{context.results_link}}}\">View Alert in Kibana</a></p>"
 }
 ```
-osquery action:
+adding the osquery action:
 `SELECT * FROM crontab;`
 this will help us to see what crontab looks like after the modification.
 
-resulting on the alert:
+This rule will result on the alert:
+
 ![Pasted image 20261008161122](images/Pasted%20image%2020261008161122.png)
+
 ---
 and on the osquery response we can see an entry that catches the eye
+
 ![Pasted image 20261008161252](images/Pasted%20image%2020261008161252.png)
+
 we see it is an entry that runs /tmp/ubuntu_updater.sh every minute.
 
 ---
 ### investigation and triage
 
 To analyze the crontab execution we will look at the file inside the machine(after disconnecting it from all networks):
+
 ![Pasted image 20261008161430](images/Pasted%20image%2020261008161430.png)
+
 The first command lists connections with ss, greps to see if there is one to the attackers ip, and if so exits. Otherwise it initiates a reverse shell connection to `172.31.0.15:4444`. This ip matches the one that was bruteforcing our ssh, per the ssh bruteforce alert.
 
 We want to see when the attacker first gained access and the logs it left.
 We know because of the ssh alert that it was around 16:00, look for the specific log:
+
 ![Pasted image 20261008162506](images/Pasted%20image%2020261008162506.png)
 
-We also want to know what commands the attacker ran after logging in.![Pasted image 20261008163124](images/Pasted%20image%2020261008163124.png)
+
+We also want to know what commands the attacker ran after logging in.
+
+![Pasted image 20261008163124](images/Pasted%20image%2020261008163124.png)
+
 
 Apparently they only ran the commands to establish persistence, and after that some system/network recon. No signs of further exploitation.
 
 To map all of the attacker's activity, we are going to see if there actually was even a connection from the reverse shell, or if all were run from the ssh login.
+
 ```lucene
 event.category: "network" and destination.ip: "172.31.0.15" and destination.port: 4444 and event.type: ("start" or "connection" or "info" or "end")
 ```
+
 ![Pasted image 20261008193620](images/Pasted%20image%2020261008193620.png)
+
 first one:
 ```JSON
 "destination": {
