@@ -3,7 +3,7 @@
 
 ### overview
 
-Threat detection & adversary emulation lab
+Threat detection & adversary emulation lab.
 End to end, locally hosted threat emulation + SOC managing and detection homelab. 
 
 ### tech stack
